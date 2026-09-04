@@ -1,64 +1,62 @@
-# Agentic Web Signals
+# llms.txt snapshots
 
-A reproducible field study of how public websites communicate preferences and discovery hints to AI agents.
+Dated checks of `/llms.txt`, discovery links, and crawler directives across a
+fixed set of public web origins.
 
-The project observes four machine-readable surfaces:
+The collector requests each declared landing URL, its root `/llms.txt`, and one
+missing path. It records HTTP outcomes, redirect hops, robots decisions, link
+metadata, selected headers, and fingerprints of the retained response bytes.
+Response bodies are not published.
 
-- `robots.txt` rules for named AI-related user agents;
-- root and linked `llms.txt` resources;
-- HTTP and HTML links such as `rel="describedby"` and Markdown alternates;
-- response headers such as `Content-Signal` and `X-Robots-Tag`.
+## Latest snapshot
 
-## Why this exists
+The protocol v0.2 run on 2026-09-04 covered 30 selected origins.
 
-`llms.txt` v2 introduced path-scoped discovery and explicit link relations in August 2026. Most public measurements still focus on whether `/llms.txt` exists. This repository starts with a smaller, auditable question: can an agent discover the signals, and do those signals agree?
+| Result | Count |
+|---|---:|
+| Plausible root `/llms.txt` | 7 |
+| Root `/llms.txt` not found | 21 |
+| Root `/llms.txt` forbidden | 2 |
+| Successful landing response | 27 |
+| Landing response with Markdown alternate | 2 of 27 |
+| Landing response with `/llms.txt` `describedby` link | 0 of 27 |
 
-The first release is a purposive pilot across AI labs, developer platforms, cloud providers, language ecosystems, and standards or publishing sites. It is not a popularity ranking and must not be generalized to the whole web.
+See the [report](snapshots/2026-09-04-v0.2/) and
+[JSONL observations](snapshots/2026-09-04-v0.2/observations.jsonl). The sample
+is deliberately small and non-random; these counts are not web-wide estimates.
 
-## Pilot result: 2026-09-04
+## Run the collector
 
-The first 30-target snapshot found:
-
-- **7/30** plausible root `llms.txt` files;
-- **2/30** landing pages advertising a Markdown alternate;
-- **0/30** landing pages advertising `rel="describedby"`;
-- **0/30** observed `Content-Signal` or `X-Robots-Tag` headers on the landing response;
-- **27/30** landing pages returning HTTP `200` to the identified collector.
-
-Root `llms.txt` files were observed at Azure, Cloudflare, Cohere, GitHub, Netlify, Node.js, and Vercel. Cloudflare and Netlify were the only targets where the landing page also exposed a Markdown alternate. These numbers describe this pilot only; see the [dated report](reports/2026-09-04.md) for denominators and failure cases.
-
-## Repository map
-
-- [`METHODOLOGY.md`](METHODOLOGY.md) defines the protocol, ethics, and limits.
-- [`sample/targets.csv`](sample/targets.csv) is the declared pilot sample.
-- [`DATA.md`](DATA.md) documents every snapshot field.
-- `src/collect.py` performs bounded requests and writes machine-readable observations.
-- `tests/` checks parsing and classification against authored fixtures.
-- `data/snapshots/` contains dated JSONL observations without copied page bodies.
-- `reports/` contains dated findings derived from a snapshot.
-
-## Reproduce the pilot
+Python 3.10 or newer is required.
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock
+.\.venv\Scripts\python.exe -m pip install --no-build-isolation --no-deps -e .
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe src\collect.py --sample sample\targets.csv --out data\snapshots\2026-09-04.jsonl --summary data\summary\2026-09-04.csv
+.\.venv\Scripts\python.exe -m llms_txt_snapshots --targets targets.csv --output-dir runs\local
 ```
 
-The collector identifies itself, fetches `robots.txt` first, respects rules for its own user agent, limits bodies to 512 KiB, uses four workers, and retries only safe `GET` requests after transient failures.
+The output directory must not already exist. A run writes
+`observations.jsonl` and `summary.csv`; released snapshots cannot be overwritten
+by the CLI.
 
-## Interpretation boundary
+## Files
 
-These files record published signals, not crawler behavior, legal permission, or policy compliance. `robots.txt` expresses preferences; it is not authentication or access control. Absence of a signal means “not observed,” never “allowed.”
+- [`METHODS.md`](METHODS.md) defines the request and classification rules.
+- [`SCHEMA.md`](SCHEMA.md) documents the JSONL and CSV fields.
+- [`targets.csv`](targets.csv) is the fixed convenience sample.
+- [`snapshots/`](snapshots/) contains versioned observations and reports.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) lists the checks required for changes.
 
-## Sources
+The [v0.1 snapshot](snapshots/2026-09-04-v0.1/) is kept with a correction note.
+It is not used as the v0.2 baseline.
 
-- [llms.txt v2 specification](https://llmstxt.org/)
-- [llms.txt v2 changes](https://llmstxt.org/changes.html)
+## References
+
+- [llms.txt proposal, revision 2](https://llmstxt.org/)
 - [Robots Exclusion Protocol, RFC 9309](https://www.rfc-editor.org/rfc/rfc9309.html)
-- [Cloudflare managed robots.txt and Content Signals](https://developers.cloudflare.com/bots/additional-configurations/managed-robots-txt/)
 
-## License
-
-Original code, documentation, and extracted factual observations are released under the [MIT License](LICENSE). Source websites retain all rights in their content; response bodies are hashed and discarded rather than republished.
+Code and documentation are under the [MIT License](LICENSE). Original snapshot
+metadata is dedicated under [CC0 1.0](DATA-LICENSE.md). Source sites retain all
+rights in their content.
