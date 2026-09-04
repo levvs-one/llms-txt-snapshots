@@ -1,27 +1,30 @@
 # Contributing
 
-Corrections and protocol critiques are welcome when they are specific and reproducible.
+Specific bug reports and small, tested changes are welcome.
 
-## Data correction
-
-Open an issue or pull request containing:
-
-1. the target URL and snapshot date;
-2. the exact field believed to be wrong;
-3. a command, response header, or public permalink that reproduces the discrepancy;
-4. whether the difference is a collection error or a later website change.
-
-Released snapshots are immutable. Confirmed collector errors are documented in a correction note and fixed in the next dated snapshot. Ordinary changes on a target site are new observations, not retroactive errors.
-
-## Code changes
-
-Run the standard-library test suite before submitting a change:
+## Set up
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e .
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-Protocol-changing pull requests must update `METHODOLOGY.md`, increment the protocol or collector version, and explain how comparability with earlier snapshots is affected.
+Before opening a pull request, also run:
 
-Do not add stored page bodies, authentication material, personal data, or code intended to bypass access controls.
+```powershell
+.\.venv\Scripts\python.exe -m compileall -q src tests
+.\.venv\Scripts\python.exe -m pip check
+```
 
+A collector fix should include a regression test. A protocol change must update
+`METHODS.md`, the collector version, and the schema version when the public
+record shape changes.
+
+For a data correction, include the snapshot version, target URL, exact field,
+and a reproducible reason. A later change on the target site is a new
+observation, not a correction to an older snapshot.
+
+Do not add response bodies, credentials, personal data, or code that bypasses
+access controls. Released snapshot files are not edited in place; corrections
+are documented and followed by a new versioned run.

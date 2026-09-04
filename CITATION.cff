@@ -1,12 +1,13 @@
 cff-version: 1.2.0
-message: "If you use a snapshot or the collection method, cite the dated release."
+message: "Cite the release that contains the snapshot you used."
 type: dataset
-title: "Agentic Web Signals: 2026-09-04 pilot"
-version: 0.1.0
+title: "llms.txt snapshots"
+abstract: "Dated observations of /llms.txt responses, discovery links, and crawler directives across a fixed set of public web origins."
+version: 0.2.0
 date-released: 2026-09-04
 authors:
-  - alias: levvs-one
-repository-code: "https://github.com/levvs-one/agentic-web-signals"
-url: "https://github.com/levvs-one/agentic-web-signals/releases/tag/v0.1.0"
-license: MIT
-
+  - name: "levvs-one"
+    website: "https://github.com/levvs-one"
+repository-code: "https://github.com/levvs-one/llms-txt-snapshots"
+url: "https://github.com/levvs-one/llms-txt-snapshots/releases/tag/v0.2.0"
+license: CC0-1.0

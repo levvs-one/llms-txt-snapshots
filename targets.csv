@@ -1,0 +1,31 @@
+category,url,rationale
+ai-platforms,https://openai.com/,Model provider with public product and policy pages
+ai-platforms,https://anthropic.com/,Model provider with public product and policy pages
+ai-platforms,https://ai.google.dev/,Public documentation for Google's AI developer platform
+ai-platforms,https://huggingface.co/,Public model and dataset registry
+ai-platforms,https://cohere.com/,Model provider with public product and documentation pages
+developer-platforms,https://github.com/,Public code hosting and collaboration service
+developer-platforms,https://gitlab.com/,Public code hosting and delivery service
+developer-platforms,https://bitbucket.org/,Public code hosting and collaboration service
+developer-platforms,https://stackoverflow.com/,Public developer question-and-answer archive
+developer-platforms,https://www.npmjs.com/,Public JavaScript package registry
+developer-platforms,https://pypi.org/,Public Python package registry
+developer-platforms,https://crates.io/,Public Rust package registry
+cloud,https://www.cloudflare.com/,Web infrastructure provider that publishes crawler controls
+cloud,https://vercel.com/,Public application deployment platform
+cloud,https://www.netlify.com/,Public application deployment platform
+cloud,https://aws.amazon.com/,Public site for a large cloud platform
+cloud,https://azure.microsoft.com/,Public site for a large cloud platform
+docs-and-projects,https://www.python.org/,Python project site
+docs-and-projects,https://docs.python.org/,Python documentation origin
+docs-and-projects,https://nodejs.org/,Node.js project and documentation site
+docs-and-projects,https://www.rust-lang.org/,Rust project site
+docs-and-projects,https://go.dev/,Go project and documentation site
+docs-and-projects,https://kubernetes.io/,Kubernetes project documentation
+docs-and-projects,https://www.docker.com/,Container tooling publisher
+docs-and-projects,https://readthedocs.org/,Public documentation hosting service
+standards-publishing,https://www.wikipedia.org/,Large public reference publisher
+standards-publishing,https://arxiv.org/,Public research preprint service
+standards-publishing,https://www.w3.org/,Web standards organization
+standards-publishing,https://www.ietf.org/,Internet standards organization
+standards-publishing,https://www.mozilla.org/,Web platform and policy publisher
