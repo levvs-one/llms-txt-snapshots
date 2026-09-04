@@ -134,6 +134,20 @@ class LlmsTxtClassificationTests(unittest.TestCase):
         )
         self.assertEqual(LlmsTxtOutcome.MISSING_TITLE, result.outcome)
 
+    def test_accepts_a_heading_indented_by_three_spaces(self) -> None:
+        result = classify_llms_txt(
+            response(b"   # Example\n\nDocumentation for the project."),
+            self.probe,
+        )
+        self.assertEqual(LlmsTxtOutcome.PLAUSIBLE, result.outcome)
+
+    def test_rejects_an_indented_code_block_as_a_title(self) -> None:
+        result = classify_llms_txt(
+            response(b"    # Not a heading\n\nThis line is inside a code block."),
+            self.probe,
+        )
+        self.assertEqual(LlmsTxtOutcome.MISSING_TITLE, result.outcome)
+
     def test_rejects_exact_soft_404_body(self) -> None:
         body = b"# Generic response\n\nThis route does not exist."
         result = classify_llms_txt(response(body), response(body))

@@ -212,8 +212,9 @@ def classify_llms_txt(
             LlmsTxtOutcome.HTML_RESPONSE,
             "root llms.txt looked like an HTML page",
         )
-    first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
-    if not first_line.startswith("# "):
+    first_line = next((line for line in text.splitlines() if line.strip()), "")
+    leading_spaces = len(first_line) - len(first_line.lstrip(" "))
+    if leading_spaces > 3 or not first_line[leading_spaces:].startswith("# "):
         return LlmsTxtClassification(
             LlmsTxtOutcome.MISSING_TITLE,
             "root llms.txt did not start with a level-one Markdown title",
