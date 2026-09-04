@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use a snapshot or the collection method, cite the dated release."
+type: dataset
+title: "Agentic Web Signals: 2026-09-04 pilot"
+version: 0.1.0
+date-released: 2026-09-04
+authors:
+  - alias: levvs-one
+repository-code: "https://github.com/levvs-one/agentic-web-signals"
+url: "https://github.com/levvs-one/agentic-web-signals/releases/tag/v0.1.0"
+license: MIT
+
