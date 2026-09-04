@@ -194,6 +194,24 @@ def robots_decisions(robots_body: bytes, target_url: str) -> dict[str, bool] | N
     return {agent: parser.can_fetch(target_url, agent) for agent in POLICY_AGENTS}
 
 
+def skipped_resource(url: str, reason: str) -> dict[str, object]:
+    return {
+        "requested_url": url,
+        "final_url": None,
+        "status": None,
+        "content_type": "",
+        "bytes_read": 0,
+        "truncated": False,
+        "sha256": None,
+        "elapsed_ms": 0,
+        "redirects": 0,
+        "content_signal": None,
+        "x_robots_tag": None,
+        "link_header": None,
+        "error": reason,
+    }
+
+
 def collect_target(row: dict[str, str]) -> dict[str, object]:
     target_url = row["url"]
     parsed = urlparse(target_url)
@@ -204,13 +222,44 @@ def collect_target(row: dict[str, str]) -> dict[str, object]:
     session = build_session()
     try:
         robots_metadata, robots_body = fetch(session, robots_url)
-        decisions = robots_decisions(robots_body, target_url)
-        collector_allowed = decisions is None or decisions.get(USER_AGENT, True)
+        usable_robots_body = robots_body if robots_metadata.get("status") == 200 else b""
+        decisions = robots_decisions(usable_robots_body, target_url)
 
-        if collector_allowed:
+        def collector_can_fetch(url: str) -> bool:
+            url_decisions = robots_decisions(usable_robots_body, url)
+            return url_decisions is None or url_decisions.get(USER_AGENT, True)
+
+        collector_access = {
+            "landing": collector_can_fetch(target_url),
+            "llms": collector_can_fetch(llms_url),
+            "soft_404_probe": collector_can_fetch(probe_url),
+        }
+
+        if collector_access["landing"]:
             landing_metadata, landing_body = fetch(session, target_url)
+        else:
+            landing_metadata = skipped_resource(
+                target_url, "skipped because robots.txt disallowed the collector"
+            )
+            landing_body = b""
+
+        if collector_access["llms"]:
             llms_metadata, llms_body = fetch(session, llms_url)
+        else:
+            llms_metadata = skipped_resource(
+                llms_url, "skipped because robots.txt disallowed the collector"
+            )
+            llms_body = b""
+
+        if collector_access["soft_404_probe"]:
             probe_metadata, probe_body = fetch(session, probe_url)
+        else:
+            probe_metadata = skipped_resource(
+                probe_url, "skipped because robots.txt disallowed the collector"
+            )
+            probe_body = b""
+
+        if collector_access["landing"]:
             landing_text = decode_text(
                 landing_body, str(landing_metadata.get("content_type") or "")
             )
@@ -221,31 +270,12 @@ def collect_target(row: dict[str, str]) -> dict[str, object]:
                 if isinstance(landing_metadata.get("link_header"), str)
                 else None,
             )
-            llms_present, llms_reason = plausible_llms(
-                llms_metadata, llms_body, probe_metadata, probe_body
-            )
         else:
-            skipped = {
-                "requested_url": None,
-                "final_url": None,
-                "status": None,
-                "content_type": "",
-                "bytes_read": 0,
-                "truncated": False,
-                "sha256": None,
-                "elapsed_ms": 0,
-                "redirects": 0,
-                "content_signal": None,
-                "x_robots_tag": None,
-                "link_header": None,
-                "error": "skipped because robots.txt disallowed the collector",
-            }
-            landing_metadata = skipped.copy()
-            llms_metadata = skipped.copy()
-            probe_metadata = skipped.copy()
             discovery = []
-            llms_present = False
-            llms_reason = "not requested because robots.txt disallowed the collector"
+
+        llms_present, llms_reason = plausible_llms(
+            llms_metadata, llms_body, probe_metadata, probe_body
+        )
 
         return {
             "schema_version": "0.1",
@@ -254,7 +284,7 @@ def collect_target(row: dict[str, str]) -> dict[str, object]:
             "category": row["category"],
             "target_url": target_url,
             "rationale": row["rationale"],
-            "collector_allowed": collector_allowed,
+            "collector_access": collector_access,
             "robots_decisions": decisions,
             "discovery_links": discovery,
             "llms_root_plausible": llms_present,
@@ -316,7 +346,7 @@ def write_summary(path: Path, records: list[dict[str, object]]) -> None:
                 {
                     "category": record["category"],
                     "target_url": record["target_url"],
-                    "collector_allowed": record["collector_allowed"],
+                    "collector_allowed": record["collector_access"]["landing"],
                     "landing_status": landing["status"],
                     "robots_status": resources["robots"]["status"],
                     "llms_status": resources["llms"]["status"],
@@ -371,4 +401,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
